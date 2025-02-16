@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+            position: relative;
+            z-index: 2;
+        }
+
+        input {
+            width: 70%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 78%;
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .weather-info {
+            margin-top: 10px;
+            display: none;
+        }
+
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Video Background -->
+    <video id="background-video" class="video-background" autoplay loop muted playsinline>
+
+        <source id="video-source" src="222841_medium.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+
+    </video>
+
+    <div class="container">
+        <h1>Weather App</h1>
+        <input type="text" id="cityInput" placeholder="Enter city">
+        <button onclick="getWeather()">Get Weather</button>
+        <div id="weatherInfo" class="weather-info">
+            <h2 id="cityName"></h2>
+            <p id="temperature"></p>
+            <p id="condition"></p>
+            <p id="humidity"></p>
+        </div>
+    </div>
+
+    <script>
+        async function getWeather() {
+            const city = document.getElementById('cityInput').value;
+            if (!city) {
+                alert('Please enter a city');
+                return;
+            }
+            const apiKey = '3b3ee0787a704f23996160543251602';
+            const url = `http://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}&aqi=yes`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                document.getElementById('cityName').innerText = data.location.name + ', ' + data.location.country;
+                document.getElementById('temperature').innerText = `Temperature: ${data.current.temp_c}°C`;
+                document.getElementById('condition').innerText = `Condition: ${data.current.condition.text}`;
+                document.getElementById('humidity').innerText = `Humidity: ${data.current.humidity}%`;
+                document.getElementById('weatherInfo').style.display = 'block';
+
+                // Get weather condition
+                let weatherCondition = data.current.condition.text.toLowerCase();
+                updateBackgroundVideo(weatherCondition);
+
+            } catch (error) {
+                alert('Error fetching weather data');
+            }
+        }
+
+        function updateBackgroundVideo(condition) {
+            let videoSource = document.getElementById("video-source");
+            let videoElement = document.getElementById("background-video");
+
+            if (condition.includes("rain")) {
+                videoSource.src = "Rain.mp4";
+            } else if (condition.includes("clear") || condition.includes("sunny")) {
+                videoSource.src = "sunny.mp4";
+            } else if (condition.includes("cloud")) {
+                videoSource.src = "cloudy.mp4";
+            } else if (condition.includes("snow")) {
+                videoSource.src = "snow.mp4";
+            } else {
+                videoSource.src = "default.mp4";
+            }
+
+            videoElement.load(); // Reload video to apply changes
+        }
+    </script>
+</body>
+
+</html>
